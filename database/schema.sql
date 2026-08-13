@@ -1,0 +1,125 @@
+-- ============================================================
+-- Personal Music Library & Playlist Manager
+-- Full Application Database Schema (PostgreSQL)
+-- ============================================================
+
+-- USERS ---------------------------------------------------------
+CREATE TABLE users (
+    id            BIGSERIAL PRIMARY KEY,
+    username      VARCHAR(50)  UNIQUE NOT NULL,
+    email         VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role          VARCHAR(20)  NOT NULL DEFAULT 'LISTENER'
+                  CHECK (role IN ('LISTENER', 'ARTIST', 'ADMIN')),
+    created_at    TIMESTAMP    NOT NULL DEFAULT now()
+);
+
+-- ARTIST PROFILES -------------------------------------------------
+-- 1:1 with a user who has the ARTIST role.
+CREATE TABLE artist_profiles (
+    id            BIGSERIAL PRIMARY KEY,
+    user_id       BIGINT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    display_name  VARCHAR(255) NOT NULL,
+    bio           TEXT,
+    verified      BOOLEAN NOT NULL DEFAULT false,
+    created_at    TIMESTAMP NOT NULL DEFAULT now()
+);
+
+-- ALBUMS -----------------------------------------------------------
+CREATE TABLE albums (
+    id                 BIGSERIAL PRIMARY KEY,
+    title              VARCHAR(255) NOT NULL,
+    primary_artist_id  BIGINT NOT NULL REFERENCES artist_profiles(id) ON DELETE CASCADE,
+    release_date       DATE,
+    cover_url          VARCHAR(500),
+    created_at         TIMESTAMP NOT NULL DEFAULT now()
+);
+
+-- SONGS --------------------------------------------------------------
+CREATE TABLE songs (
+    id            BIGSERIAL PRIMARY KEY,
+    title         VARCHAR(255) NOT NULL,
+    album_id      BIGINT REFERENCES albums(id) ON DELETE SET NULL,
+    duration      INTEGER,              -- seconds
+    audio_url     VARCHAR(500),
+    release_date  DATE,
+    play_count    INTEGER NOT NULL DEFAULT 0,
+    created_at    TIMESTAMP NOT NULL DEFAULT now()
+);
+
+-- SONG <-> ARTIST (many-to-many, supports collaborations) -----------
+CREATE TABLE song_artists (
+    id         BIGSERIAL PRIMARY KEY,
+    song_id    BIGINT NOT NULL REFERENCES songs(id) ON DELETE CASCADE,
+    artist_id  BIGINT NOT NULL REFERENCES artist_profiles(id) ON DELETE CASCADE,
+    role       VARCHAR(20) NOT NULL DEFAULT 'PRIMARY'
+               CHECK (role IN ('PRIMARY', 'FEATURED')),
+    UNIQUE (song_id, artist_id)
+);
+
+-- GENRES ----------------------------------------------------------------
+CREATE TABLE genres (
+    id    BIGSERIAL PRIMARY KEY,
+    name  VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- SONG <-> GENRE (many-to-many) -----------------------------------------
+CREATE TABLE song_genres (
+    id        BIGSERIAL PRIMARY KEY,
+    song_id   BIGINT NOT NULL REFERENCES songs(id) ON DELETE CASCADE,
+    genre_id  BIGINT NOT NULL REFERENCES genres(id) ON DELETE CASCADE,
+    UNIQUE (song_id, genre_id)
+);
+
+-- PLAYLISTS ------------------------------------------------------------
+CREATE TABLE playlists (
+    id           BIGSERIAL PRIMARY KEY,
+    name         VARCHAR(255) NOT NULL,
+    description  VARCHAR(500),
+    mood         VARCHAR(50),
+    user_id      BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at   TIMESTAMP NOT NULL DEFAULT now()
+);
+
+-- PLAYLIST <-> SONG (many-to-many) -----------------------------------
+CREATE TABLE playlist_songs (
+    id           BIGSERIAL PRIMARY KEY,
+    playlist_id  BIGINT NOT NULL REFERENCES playlists(id) ON DELETE CASCADE,
+    song_id      BIGINT NOT NULL REFERENCES songs(id) ON DELETE CASCADE,
+    added_at     TIMESTAMP NOT NULL DEFAULT now(),
+    position     INTEGER,
+    UNIQUE (playlist_id, song_id)
+);
+
+-- PLAY HISTORY -----------------------------------------------------------
+CREATE TABLE play_history (
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    song_id    BIGINT NOT NULL REFERENCES songs(id) ON DELETE CASCADE,
+    played_at  TIMESTAMP NOT NULL DEFAULT now()
+);
+
+-- ARTIST FOLLOWS (many-to-many) -------------------------------------------
+CREATE TABLE artist_follows (
+    id           BIGSERIAL PRIMARY KEY,
+    user_id      BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    artist_id    BIGINT NOT NULL REFERENCES artist_profiles(id) ON DELETE CASCADE,
+    followed_at  TIMESTAMP NOT NULL DEFAULT now(),
+    UNIQUE (user_id, artist_id)
+);
+
+-- ============================================================
+-- Indexes for common query patterns
+-- ============================================================
+CREATE INDEX idx_songs_album_id           ON songs(album_id);
+CREATE INDEX idx_song_artists_song_id     ON song_artists(song_id);
+CREATE INDEX idx_song_artists_artist_id   ON song_artists(artist_id);
+CREATE INDEX idx_song_genres_song_id      ON song_genres(song_id);
+CREATE INDEX idx_song_genres_genre_id     ON song_genres(genre_id);
+CREATE INDEX idx_playlist_songs_playlist  ON playlist_songs(playlist_id);
+CREATE INDEX idx_playlist_songs_song      ON playlist_songs(song_id);
+CREATE INDEX idx_play_history_user_time   ON play_history(user_id, played_at);
+CREATE INDEX idx_play_history_song        ON play_history(song_id);
+CREATE INDEX idx_artist_follows_user      ON artist_follows(user_id);
+CREATE INDEX idx_artist_follows_artist    ON artist_follows(artist_id);
+CREATE INDEX idx_albums_primary_artist    ON albums(primary_artist_id);
