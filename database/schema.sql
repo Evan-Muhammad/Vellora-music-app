@@ -1,8 +1,3 @@
--- ============================================================
--- Personal Music Library & Playlist Manager
--- Full Application Database Schema (PostgreSQL)
--- ============================================================
-
 -- USERS ---------------------------------------------------------
 CREATE TABLE users (
     id            BIGSERIAL PRIMARY KEY,
@@ -15,7 +10,6 @@ CREATE TABLE users (
 );
 
 -- ARTIST PROFILES -------------------------------------------------
--- 1:1 with a user who has the ARTIST role.
 CREATE TABLE artist_profiles (
     id            BIGSERIAL PRIMARY KEY,
     user_id       BIGINT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -108,9 +102,6 @@ CREATE TABLE artist_follows (
     UNIQUE (user_id, artist_id)
 );
 
--- ============================================================
--- Indexes for common query patterns
--- ============================================================
 CREATE INDEX idx_songs_album_id           ON songs(album_id);
 CREATE INDEX idx_song_artists_song_id     ON song_artists(song_id);
 CREATE INDEX idx_song_artists_artist_id   ON song_artists(artist_id);
@@ -123,3 +114,31 @@ CREATE INDEX idx_play_history_song        ON play_history(song_id);
 CREATE INDEX idx_artist_follows_user      ON artist_follows(user_id);
 CREATE INDEX idx_artist_follows_artist    ON artist_follows(artist_id);
 CREATE INDEX idx_albums_primary_artist    ON albums(primary_artist_id);
+
+
+
+
+CREATE VIEW song_catalog AS
+SELECT
+    s.id AS song_id,
+    s.title,
+    s.duration,
+    s.play_count,
+    ap.display_name AS primary_artist,
+    STRING_AGG(DISTINCT g.name, ', ') AS genres
+FROM songs s
+         JOIN song_artists sa ON sa.song_id = s.id AND sa.role = 'PRIMARY'
+         JOIN artist_profiles ap ON ap.id = sa.artist_id
+         LEFT JOIN song_genres sg ON sg.song_id = s.id
+         LEFT JOIN genres g ON g.id = sg.genre_id
+GROUP BY s.id, s.title, s.duration, s.play_count, ap.display_name;
+
+
+
+CREATE MATERIALIZED VIEW top_played_songs_mv AS
+SELECT s.id AS song_id, s.title, s.play_count
+FROM songs s
+ORDER BY s.play_count DESC;
+
+-- Required for REFRESH ... CONCURRENTLY (per your lecture, section 10)
+CREATE UNIQUE INDEX idx_top_played_songs_mv_id ON top_played_songs_mv (song_id);
