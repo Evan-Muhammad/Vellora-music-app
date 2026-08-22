@@ -1,6 +1,7 @@
 package com.vellora.vellora_backend.controller;
 
 import com.vellora.vellora_backend.model.Song;
+import com.vellora.vellora_backend.repository.SongCatalogView;
 import com.vellora.vellora_backend.service.SongService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,11 @@ public class SongController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/search")
+    public List<SongCatalogView> search(@RequestParam String query) {
+        return songService.searchSongs(query);
     }
 
     public record CreateSongRequest(

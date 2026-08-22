@@ -1,10 +1,7 @@
 package com.vellora.vellora_backend.service;
 
 import com.vellora.vellora_backend.model.*;
-import com.vellora.vellora_backend.repository.ArtistProfileRepository;
-import com.vellora.vellora_backend.repository.GenreRepository;
-import com.vellora.vellora_backend.repository.SongArtistRepository;
-import com.vellora.vellora_backend.repository.SongRepository;
+import com.vellora.vellora_backend.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -63,5 +60,9 @@ public class SongService {
         }
 
         return song;
+    }
+
+    public List<SongCatalogView> searchSongs(String query) {
+        return songRepository.search(query);
     }
 }
