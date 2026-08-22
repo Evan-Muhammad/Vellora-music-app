@@ -142,3 +142,16 @@ ORDER BY s.play_count DESC;
 
 -- Required for REFRESH ... CONCURRENTLY (per your lecture, section 10)
 CREATE UNIQUE INDEX idx_top_played_songs_mv_id ON top_played_songs_mv (song_id);
+
+
+CREATE VIEW top_artists_view AS
+SELECT
+    ap.id AS artist_id,
+    ap.display_name,
+    SUM(s.play_count) AS total_plays
+FROM artist_profiles ap
+         JOIN song_artists sa ON sa.artist_id = ap.id AND sa.role = 'PRIMARY'
+         JOIN songs s ON s.id = sa.song_id
+GROUP BY ap.id, ap.display_name
+ORDER BY total_plays DESC;
+
