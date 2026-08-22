@@ -37,6 +37,18 @@ public class PlaylistController {
         return playlistService.getSongsInPlaylist(id);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
+        playlistService.deletePlaylist(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/songs/{songId}")
+    public ResponseEntity<Void> removeSong(@PathVariable Long id, @PathVariable Long songId) {
+        playlistService.removeSongFromPlaylist(id, songId);
+        return ResponseEntity.noContent().build();
+    }
+
     public record CreatePlaylistRequest(Long userId, String name, String description, String mood) {}
     public record AddSongRequest(Long songId, Integer position) {}
 }

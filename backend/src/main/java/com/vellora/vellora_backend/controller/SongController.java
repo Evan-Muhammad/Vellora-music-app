@@ -36,6 +36,17 @@ public class SongController {
         return songService.searchSongs(query);
     }
 
+    @PutMapping("/{id}")
+    public Song updateSong(@PathVariable Long id, @RequestBody UpdateSongRequest request) {
+        return songService.updateSong(id, request.title(), request.duration());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSong(@PathVariable Long id) {
+        songService.deleteSong(id);
+        return ResponseEntity.noContent().build();
+    }
+
     public record CreateSongRequest(
             Long primaryArtistId,
             String title,
@@ -43,4 +54,6 @@ public class SongController {
             List<Long> featuredArtistIds,
             List<Long> genreIds
     ) {}
+
+    public record UpdateSongRequest(String title, Integer duration) {}
 }

@@ -1,6 +1,7 @@
 package com.vellora.vellora_backend.service;
 
 import com.vellora.vellora_backend.exception.ArtistNotFoundException;
+import com.vellora.vellora_backend.exception.SongNotFoundException;
 import com.vellora.vellora_backend.model.*;
 import com.vellora.vellora_backend.repository.*;
 import org.springframework.stereotype.Service;
@@ -65,5 +66,20 @@ public class SongService {
 
     public List<SongCatalogView> searchSongs(String query) {
         return songRepository.search(query);
+    }
+
+    public Song updateSong(Long id, String title, Integer duration) {
+        Song song = songRepository.findById(id)
+                .orElseThrow(() -> new SongNotFoundException("Song not found"));
+        song.setTitle(title);
+        song.setDuration(duration);
+        return songRepository.save(song);
+    }
+
+    public void deleteSong(Long id) {
+        if (!songRepository.existsById(id)) {
+            throw new SongNotFoundException("Song not found");
+        }
+        songRepository.deleteById(id);
     }
 }

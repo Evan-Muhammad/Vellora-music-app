@@ -58,4 +58,20 @@ public class PlaylistService {
     public List<PlaylistSong> getSongsInPlaylist(Long playlistId) {
         return playlistSongRepository.findByPlaylistId(playlistId);
     }
+
+    public void deletePlaylist(Long id) {
+        if (!playlistRepository.existsById(id)) {
+            throw new PlaylistNotFoundException("Playlist not found");
+        }
+        playlistRepository.deleteById(id);
+    }
+
+    public void removeSongFromPlaylist(Long playlistId, Long songId) {
+        List<PlaylistSong> matches = playlistSongRepository.findByPlaylistId(playlistId);
+        PlaylistSong toRemove = matches.stream()
+                .filter(ps -> ps.getSong().getId().equals(songId))
+                .findFirst()
+                .orElseThrow(() -> new SongNotFoundException("Song not in this playlist"));
+        playlistSongRepository.delete(toRemove);
+    }
 }
