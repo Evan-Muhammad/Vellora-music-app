@@ -1,5 +1,7 @@
 package com.vellora.vellora_backend.service;
 
+import com.vellora.vellora_backend.exception.SongNotFoundException;
+import com.vellora.vellora_backend.exception.UserNotFoundException;
 import com.vellora.vellora_backend.model.PlayHistory;
 import com.vellora.vellora_backend.model.Song;
 import com.vellora.vellora_backend.model.User;
@@ -29,10 +31,10 @@ public class PlayHistoryService {
     @Transactional
     public PlayHistory recordPlay(Long userId, Long songId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Song song = songRepository.findById(songId)
-                .orElseThrow(() -> new RuntimeException("Song not found"));
+                .orElseThrow(() -> new SongNotFoundException("Song not found"));
 
         song.setPlayCount(song.getPlayCount() + 1);
         songRepository.save(song);

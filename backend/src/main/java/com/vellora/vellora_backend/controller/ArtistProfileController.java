@@ -3,8 +3,6 @@ package com.vellora.vellora_backend.controller;
 import com.vellora.vellora_backend.dto.ArtistProfileSummary;
 import com.vellora.vellora_backend.model.ArtistProfile;
 import com.vellora.vellora_backend.service.ArtistProfileService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,14 +16,10 @@ public class ArtistProfileController {
     }
 
     @PostMapping
-    public ResponseEntity<?> becomeArtist(@RequestBody BecomeArtistRequest request) {
-        try {
-            ArtistProfile profile = artistProfileService.becomeArtist(
-                    request.userId(), request.displayName(), request.bio());
-            return ResponseEntity.status(HttpStatus.CREATED).body(ArtistProfileSummary.from(profile));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ArtistProfileSummary becomeArtist(@RequestBody BecomeArtistRequest request) {
+        ArtistProfile profile = artistProfileService.becomeArtist(
+                request.userId(), request.displayName(), request.bio());
+        return ArtistProfileSummary.from(profile);
     }
 
     public record BecomeArtistRequest(Long userId, String displayName, String bio) {}

@@ -19,13 +19,9 @@ public class PlayHistoryController {
     }
 
     @PostMapping("/{songId}/play")
-    public ResponseEntity<?> play(@PathVariable Long songId, @RequestBody PlayRequest request) {
-        try {
-            PlayHistory playHistory = playHistoryService.recordPlay(request.userId(), songId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(playHistory);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<PlayHistory> play(@PathVariable Long songId, @RequestBody PlayRequest request) {
+        PlayHistory playHistory = playHistoryService.recordPlay(request.userId(), songId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(playHistory);
     }
 
     @GetMapping("/history/{userId}")

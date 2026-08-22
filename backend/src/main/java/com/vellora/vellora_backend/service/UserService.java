@@ -1,5 +1,7 @@
 package com.vellora.vellora_backend.service;
 
+import com.vellora.vellora_backend.exception.InvalidCredentialsException;
+import com.vellora.vellora_backend.exception.UserNotFoundException;
 import com.vellora.vellora_backend.model.Role;
 import com.vellora.vellora_backend.model.User;
 import com.vellora.vellora_backend.repository.UserRepository;
@@ -27,10 +29,10 @@ public class UserService {
 
     public User login(String username, String password) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
-            throw new RuntimeException("Invalid username or password");
+            throw new InvalidCredentialsException("Invalid username or password");
         }
 
         return user;
@@ -38,7 +40,7 @@ public class UserService {
 
     public User updateUser(Long id, String username, String email) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         user.setUsername(username);
         user.setEmail(email);

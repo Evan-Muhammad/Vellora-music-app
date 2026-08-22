@@ -1,5 +1,6 @@
 package com.vellora.vellora_backend.service;
 
+import com.vellora.vellora_backend.exception.ArtistNotFoundException;
 import com.vellora.vellora_backend.model.*;
 import com.vellora.vellora_backend.repository.*;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class SongService {
                            List<Long> featuredArtistIds, List<Long> genreIds) {
 
         ArtistProfile primaryArtist = artistProfileRepository.findById(primaryArtistId)
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
+                .orElseThrow(() -> new ArtistNotFoundException("Artist not found"));
 
         Song song = new Song();
         song.setTitle(title);
@@ -50,7 +51,7 @@ public class SongService {
         if (featuredArtistIds != null) {
             for (Long featuredId : featuredArtistIds) {
                 ArtistProfile featuredArtist = artistProfileRepository.findById(featuredId)
-                        .orElseThrow(() -> new RuntimeException("Featured artist not found: " + featuredId));
+                        .orElseThrow(() -> new ArtistNotFoundException("Featured artist not found: " + featuredId));
                 SongArtist featuredLink = new SongArtist();
                 featuredLink.setSong(song);
                 featuredLink.setArtist(featuredArtist);

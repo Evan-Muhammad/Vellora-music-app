@@ -1,5 +1,8 @@
 package com.vellora.vellora_backend.service;
 
+import com.vellora.vellora_backend.exception.PlaylistNotFoundException;
+import com.vellora.vellora_backend.exception.SongNotFoundException;
+import com.vellora.vellora_backend.exception.UserNotFoundException;
 import com.vellora.vellora_backend.model.*;
 import com.vellora.vellora_backend.repository.*;
 import org.springframework.stereotype.Service;
@@ -26,7 +29,7 @@ public class PlaylistService {
 
     public Playlist createPlaylist(Long userId, String name, String description, String mood) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Playlist playlist = new Playlist();
         playlist.setUser(user);
@@ -39,10 +42,10 @@ public class PlaylistService {
 
     public PlaylistSong addSongToPlaylist(Long playlistId, Long songId, Integer position) {
         Playlist playlist = playlistRepository.findById(playlistId)
-                .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                .orElseThrow(() -> new PlaylistNotFoundException("Playlist not found"));
 
         Song song = songRepository.findById(songId)
-                .orElseThrow(() -> new RuntimeException("Song not found"));
+                .orElseThrow(() -> new SongNotFoundException("Song not found"));
 
         PlaylistSong playlistSong = new PlaylistSong();
         playlistSong.setPlaylist(playlist);

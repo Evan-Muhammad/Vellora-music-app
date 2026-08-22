@@ -20,19 +20,15 @@ public class SongController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createSong(@RequestBody CreateSongRequest request) {
-        try {
-            Song song = songService.createSong(
-                    request.primaryArtistId(),
-                    request.title(),
-                    request.duration(),
-                    request.featuredArtistIds(),
-                    request.genreIds()
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(song);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<Song> createSong(@RequestBody CreateSongRequest request) {
+        Song song = songService.createSong(
+                request.primaryArtistId(),
+                request.title(),
+                request.duration(),
+                request.featuredArtistIds(),
+                request.genreIds()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(song);
     }
 
     @GetMapping("/search")

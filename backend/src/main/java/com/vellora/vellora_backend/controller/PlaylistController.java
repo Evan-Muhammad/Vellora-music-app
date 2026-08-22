@@ -20,24 +20,16 @@ public class PlaylistController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createPlaylist(@RequestBody CreatePlaylistRequest request) {
-        try {
-            Playlist playlist = playlistService.createPlaylist(
-                    request.userId(), request.name(), request.description(), request.mood());
-            return ResponseEntity.status(HttpStatus.CREATED).body(playlist);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<Playlist> createPlaylist(@RequestBody CreatePlaylistRequest request) {
+        Playlist playlist = playlistService.createPlaylist(
+                request.userId(), request.name(), request.description(), request.mood());
+        return ResponseEntity.status(HttpStatus.CREATED).body(playlist);
     }
 
     @PostMapping("/{id}/songs")
-    public ResponseEntity<?> addSong(@PathVariable Long id, @RequestBody AddSongRequest request) {
-        try {
-            PlaylistSong playlistSong = playlistService.addSongToPlaylist(id, request.songId(), request.position());
-            return ResponseEntity.status(HttpStatus.CREATED).body(playlistSong);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+    public ResponseEntity<PlaylistSong> addSong(@PathVariable Long id, @RequestBody AddSongRequest request) {
+        PlaylistSong playlistSong = playlistService.addSongToPlaylist(id, request.songId(), request.position());
+        return ResponseEntity.status(HttpStatus.CREATED).body(playlistSong);
     }
 
     @GetMapping("/{id}/songs")
