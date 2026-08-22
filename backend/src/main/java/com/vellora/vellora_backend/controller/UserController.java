@@ -1,7 +1,9 @@
 package com.vellora.vellora_backend.controller;
 
+import com.vellora.vellora_backend.dto.AuthResponse;
 import com.vellora.vellora_backend.dto.UserSummary;
 import com.vellora.vellora_backend.model.User;
+import com.vellora.vellora_backend.security.JwtService;
 import com.vellora.vellora_backend.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,9 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtService jwtService) {
         this.userService = userService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping
@@ -22,9 +26,10 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public UserSummary login(@RequestBody Credentials credentials) {
+    public AuthResponse login(@RequestBody Credentials credentials) {
         User user = userService.login(credentials.username(), credentials.password());
-        return UserSummary.from(user);
+        String token = jwtService.generateToken(user.getId(), user.getUsername());
+        return new AuthResponse(UserSummary.from(user), token);
     }
 
     @PutMapping("/{id}")
