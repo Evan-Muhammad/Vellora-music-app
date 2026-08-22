@@ -31,5 +31,16 @@ public class UserController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
+        try {
+            User user = userService.updateUser(id, request.username(), request.email());
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     public record Credentials(String username, String email, String password) {}
+    public record UpdateUserRequest(String username, String email) {}
 }
