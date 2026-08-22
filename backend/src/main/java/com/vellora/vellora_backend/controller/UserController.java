@@ -1,0 +1,35 @@
+package com.vellora.vellora_backend.controller;
+
+import com.vellora.vellora_backend.model.User;
+import com.vellora.vellora_backend.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @PostMapping
+    public User register(@RequestBody Credentials credentials) {
+        return userService.register(credentials.username(), credentials.email(), credentials.password());
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Credentials credentials) {
+        try {
+            User user = userService.login(credentials.username(), credentials.password());
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    public record Credentials(String username, String email, String password) {}
+}
