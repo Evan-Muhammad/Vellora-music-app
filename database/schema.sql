@@ -155,3 +155,15 @@ FROM artist_profiles ap
 GROUP BY ap.id, ap.display_name
 ORDER BY total_plays DESC;
 
+
+CREATE TABLE song_likes (
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    song_id    BIGINT NOT NULL REFERENCES songs(id) ON DELETE CASCADE,
+    liked_at   TIMESTAMP NOT NULL DEFAULT now(),
+    UNIQUE (user_id, song_id)
+);
+
+CREATE INDEX idx_song_likes_user ON song_likes(user_id);
+CREATE INDEX idx_song_likes_song ON song_likes(song_id);
+
